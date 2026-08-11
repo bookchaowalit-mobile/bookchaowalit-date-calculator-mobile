@@ -1,4 +1,4 @@
-name: date-calculator
+name: date_calculator
 description: "Date Calculator — Mobile app (flutter)"
 publish_to: "none"
 version: 1.0.0+1
