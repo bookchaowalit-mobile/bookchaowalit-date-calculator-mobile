@@ -98,3 +98,18 @@ String formatDate(DateTime d) {
   return '${d.year}-${two(d.month)}-${two(d.day)} '
       '(${_weekdayNames[d.weekday - 1]})';
 }
+
+/// Largest day offset accepted from the UI (about 2,700 years), well inside
+/// the ±100,000,000-day range `DateTime` supports.
+const maxDayOffset = 1000000;
+
+/// Parses a signed whole number of days such as `30`, `-7` or `+14`.
+///
+/// Returns null for empty, non-decimal (`0x10`, `1.5`, `1e3`) or out-of-range
+/// input, so callers never pass `addDays` a value that makes `DateTime` throw.
+int? parseDayOffset(String input) {
+  final text = input.trim();
+  if (!RegExp(r'^[+-]?[0-9]{1,7}$').hasMatch(text)) return null;
+  final value = int.parse(text);
+  return value.abs() > maxDayOffset ? null : value;
+}

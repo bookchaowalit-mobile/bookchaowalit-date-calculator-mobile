@@ -2,7 +2,7 @@
 
 ## Current state
 
-Score: 7/10 — core feature with tested pure-Dart logic, honest CI and fail-closed release signing; still no app icon or E2E flow.
+Score: 7.5/10 — core feature with edge-case-tested date maths, crash-proof input, a11y guideline tests and fail-closed signing; no app icon, holidays or E2E flow yet.
 
 ## Backlog
 
@@ -17,10 +17,16 @@ Score: 7/10 — core feature with tested pure-Dart logic, honest CI and fail-clo
 - Add a CI job that builds a signed release bundle from repository secrets (keystore decoded at runtime, never committed).
 
 ### P2
-- Tablet layout (NavigationRail) and 130% text-scale widget test.
+- Tablet layout (NavigationRail).
 - Localisation (Thai/English) for UI strings.
 
-## Done in this pass (pass 2)
+## Done in this pass (pass 3)
+
+- Bug fix: the add/subtract field used `int.tryParse`, so a large offset (e.g. `100000000000`) made `DateTime` throw during build (red error screen) and `0x10` was read as 16. New `parseDayOffset` accepts signed decimals within ±1,000,000 days; the field shows a range error otherwise.
+- Edge-case unit tests: century leap years (1900/2000/2100), same-day and year-boundary differences, exact leap-day anniversaries, negative breakdown mirroring the positive one, a brute-force check of the business-day formula over 280 start/span combinations, UTC vs local inputs.
+- Widget tests: bad offsets never crash, date picker flow updates the difference, end-before-start note, accessibility guidelines (tap target, labels, contrast) and 200% text scale. Result date is announced as a live region.
+
+## Done in pass 2
 
 - Release builds no longer sign with the debug key: `android/app/build.gradle.kts` reads the ignored `android/key.properties` and a Gradle guard fails any release assemble/bundle without it (pattern from `bookchaowalit-goal-tracker-mobile`). Root `.gitignore` also ignores `key.properties`, `*.jks`, `*.keystore`; README documents the setup. Not build-verified here (no Android SDK/Gradle in this environment).
 

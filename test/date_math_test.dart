@@ -61,4 +61,90 @@ void main() {
     final f = difference(DateTime(2020, 2, 29), DateTime(2021, 2, 28));
     expect(f.calendarLabel, '0 years, 11 months, 30 days');
   });
+
+  group('edge cases (pass 3)', () {
+    test('century leap rules', () {
+      expect(daysInMonth(1900, 2), 28);
+      expect(daysInMonth(2000, 2), 29);
+      expect(daysInMonth(2100, 2), 28);
+      expect(daysInMonth(2026, 12), 31);
+      expect(addDays(DateTime(2100, 2, 28), 1), DateTime(2100, 3, 1));
+    });
+
+    test('same day is zero everywhere', () {
+      final d = difference(DateTime(2026, 5, 5, 23), DateTime(2026, 5, 5, 1));
+      expect(d.totalDays, 0);
+      expect(d.isNegative, isFalse);
+      expect(d.calendarLabel, '0 years, 0 months, 0 days');
+      expect(d.businessDays, 0);
+    });
+
+    test('year boundary and exact anniversaries', () {
+      expect(difference(DateTime(2025, 12, 31), DateTime(2026, 1, 1)).totalDays,
+          1);
+      expect(
+        difference(DateTime(2024, 2, 29), DateTime(2028, 2, 29)).calendarLabel,
+        '4 years, 0 months, 0 days',
+      );
+      expect(
+        difference(DateTime(2026, 3, 31), DateTime(2026, 4, 30)).calendarLabel,
+        '0 years, 0 months, 30 days',
+      );
+    });
+
+    test('negative breakdown mirrors the positive one', () {
+      final forward = difference(DateTime(2024, 1, 31), DateTime(2025, 3, 1));
+      final back = difference(DateTime(2025, 3, 1), DateTime(2024, 1, 31));
+      expect(back.totalDays, -forward.totalDays);
+      expect(back.calendarLabel, forward.calendarLabel);
+      expect(back.businessDays, -forward.businessDays);
+    });
+
+    test('business-day formula matches a day-by-day count', () {
+      final start = DateTime(2026, 1, 1);
+      for (var span = 0; span < 40; span++) {
+        for (var shift = 0; shift < 7; shift++) {
+          final a = addDays(start, shift);
+          final b = addDays(a, span);
+          var brute = 0;
+          for (var i = 0; i < span; i++) {
+            if (addDays(a, i).weekday <= DateTime.friday) brute++;
+          }
+          expect(businessDaysBetween(a, b), brute, reason: '$a +$span');
+        }
+      }
+    });
+
+    test('UTC and local inputs give the same calendar answer', () {
+      expect(
+        difference(DateTime.utc(2026, 3, 1), DateTime(2026, 3, 31)).totalDays,
+        30,
+      );
+    });
+
+    test('parseDayOffset accepts signed decimals only, within range', () {
+      expect(parseDayOffset(' 30 '), 30);
+      expect(parseDayOffset('-7'), -7);
+      expect(parseDayOffset('+14'), 14);
+      expect(parseDayOffset('$maxDayOffset'), maxDayOffset);
+      expect(parseDayOffset('-$maxDayOffset'), -maxDayOffset);
+      for (final bad in [
+        '',
+        ' ',
+        '-',
+        '1.5',
+        '1e3',
+        '0x10',
+        '1 000',
+        '${maxDayOffset + 1}',
+        '99999999999999999999',
+        '٣'
+      ]) {
+        expect(parseDayOffset(bad), isNull, reason: bad);
+      }
+      // Largest accepted offset never makes DateTime throw.
+      expect(addDays(DateTime(2026), maxDayOffset).year, greaterThan(4700));
+      expect(addDays(DateTime(2026), -maxDayOffset).year, lessThan(-700));
+    });
+  });
 }

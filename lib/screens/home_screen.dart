@@ -47,7 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
     final diff = difference(_start, _end);
-    final offset = int.tryParse(_offsetController.text.trim());
+    final offset = parseDayOffset(_offsetController.text);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Date Calculator')),
@@ -109,16 +109,23 @@ class _HomeScreenState extends State<HomeScreen> {
             decoration: InputDecoration(
               labelText: 'Days (use a minus sign to subtract)',
               border: const OutlineInputBorder(),
-              errorText: offset == null ? 'Enter a whole number' : null,
+              errorText: offset == null
+                  ? 'Enter a whole number between -$maxDayOffset '
+                      'and $maxDayOffset'
+                  : null,
             ),
             onChanged: (_) => setState(() {}),
           ),
           const SizedBox(height: 12),
           if (offset != null)
-            Text(
-              formatDate(addDays(_base, offset)),
-              key: const Key('offset-result'),
-              style: textTheme.titleLarge,
+            Semantics(
+              liveRegion: true,
+              label: 'Result date',
+              child: Text(
+                formatDate(addDays(_base, offset)),
+                key: const Key('offset-result'),
+                style: textTheme.titleLarge,
+              ),
             ),
         ],
       ),
