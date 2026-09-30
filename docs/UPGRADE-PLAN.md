@@ -25,6 +25,7 @@ Score: 7.5/10 — core feature with edge-case-tested date maths, crash-proof inp
 - Bug fix: the add/subtract field used `int.tryParse`, so a large offset (e.g. `100000000000`) made `DateTime` throw during build (red error screen) and `0x10` was read as 16. New `parseDayOffset` accepts signed decimals within ±1,000,000 days; the field shows a range error otherwise.
 - Edge-case unit tests: century leap years (1900/2000/2100), same-day and year-boundary differences, exact leap-day anniversaries, negative breakdown mirroring the positive one, a brute-force check of the business-day formula over 280 start/span combinations, UTC vs local inputs.
 - Widget tests: bad offsets never crash, date picker flow updates the difference, end-before-start note, accessibility guidelines (tap target, labels, contrast) and 200% text scale. Result date is announced as a live region.
+- The 200% text-scale widget test now runs at a 360 px phone width (it previously used the 800 px default test surface); no overflow found.
 
 ## Done in pass 2
 
